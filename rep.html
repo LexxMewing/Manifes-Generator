@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID Replacer - Minecraft Manifest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .textarea-container {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            background: #fff;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ff8a80);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .btn-info:hover {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .uuid-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .uuid-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .uuid-item:last-child {
+            border-bottom: none;
+        }
+
+        .uuid-label {
+            font-weight: bold;
+        }
+
+        .uuid-value {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .success-msg, .error-msg {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .success-msg {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .error-msg {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+        }
+
+        .success-msg.show, .error-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .file-drop {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-drop.drag-over {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            textarea {
+                min-height: 250px;
+                font-size: 12px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 UUID Replacer</h1>
+        <p class="subtitle">Ganti UUID di Manifest.json Minecraft Add-on</p>
+
+        <div class="section">
+            <h3>📄 Input Manifest.json</h3>
+            <div class="file-drop" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                📁 Klik di sini atau drag & drop file manifest.json<br>
+                <small>atau paste langsung ke textarea di bawah</small>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept=".json" onchange="handleFileSelect(event)">
+            
+            <div class="textarea-container">
+                <textarea id="inputManifest" placeholder='Paste manifest.json kamu di sini atau upload file...
+
+Contoh:
+{
+  "format_version": 2,
+  "header": {
+    "name": "My Addon",
+    "uuid": "old-uuid-here",
+    "version": [1, 0, 0]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "uuid": "old-module-uuid-here",
+      "version": [1, 0, 0]
+    }
+  ]
+}'></textarea>
+            </div>
+        </div>
+
+        <div class="uuid-info" id="uuidInfo" style="display: none;">
+            <h4>🔍 UUID yang Ditemukan:</h4>
+            <div id="uuidList"></div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn" onclick="replaceUUIDs()">🎲 Replace All UUIDs</button>
+            <button class="btn btn-info" onclick="analyzeManifest()">🔍 Analyze Manifest</button>
+            <button class="btn btn-success" onclick="copyResult()">📋 Copy Result</button>
+            <button class="btn btn-info" onclick="downloadResult()">💾 Download</button>
+        </div>
+
+        <div class="success-msg" id="successMsg"></div>
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="section">
+            <h3>✨ Result Manifest.json</h3>
+            <div class="textarea-container">
+                <textarea id="outputManifest" placeholder="Hasil manifest dengan UUID baru akan muncul di sini..." readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate UUID v4
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Handle file drop
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                readFile(files[0]);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.classList.remove('drag-over');
+        }
+
+        // Handle file select
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                readFile(file);
+            }
+        }
+
+        // Read file content
+        function readFile(file) {
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                showError('Please select a JSON file!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('inputManifest').value = e.target.result;
+                analyzeManifest();
+                showSuccess('File berhasil dimuat!');
+            };
+            reader.readAsText(file);
+        }
+
+        // Analyze manifest for UUIDs
+        function analyzeManifest() {
+            const input = document.getElementById('inputManifest').value.trim();
+            if (!input) {
+                showError('Input manifest tidak boleh kosong!');
+                return;
+            }
+
+            try {
+                const manifest = JSON.parse(input);
+                const uuids = findAllUUIDs(manifest);
+                
+                if (uuids.length === 0) {
+                    showError('Tidak ditemukan UUID dalam manifest!');
+                    return;
+                }
+
+                displayUUIDs(uuids);
+                showSuccess(`Ditemukan ${uuids.length} UUID dalam manifest!`);
+                
+            } catch (error) {
+                showError('Format JSON tidak valid! ' + error.message);
+            }
+        }
+
+        // Find all UUIDs in manifest
+        function findAllUUIDs(obj, path = '') {
+            const uuids = [];
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            
+            function traverse(object, currentPath) {
+                for (const key in object) {
+                    const newPath = currentPath ? `${currentPath}.${key}` : key;
+                    
+                    if (key === 'uuid' && typeof object[key] === 'string') {
+                        uuids.push({
+                            path: newPath,
+                            value: object[key],
+                            isValid: uuidRegex.test(object[key])
+                        });
+                    } else if (typeof object[key] === 'object' && object[key] !== null) {
+                        if (Array.isArray(object[key])) {
+                            object[key].forEach((item, index) => {
+                                if (typeof item === 'object') {
+                                    traverse(item, `${newPath}[${index}]`);
+                                }
+                            });
+                        } else {
+                            traverse(object[key], newPath);
+                        }
+                    }
+                }
+            }
+            
+            traverse(obj, path);
+            return uuids;
+        }
+
+        // Display found UUIDs
+        function displayUUIDs(uuids) {
+            const uuidInfo = document.getElementById('uuidInfo');
+            const uuidList = document.getElementById('uuidList');
+            
+            uuidList.innerHTML = uuids.map(uuid => `
+                <div class="uuid-item">
+                    <span class="uuid-label">${uuid.path}:</span>
+                    <span class="uuid-value">${uuid.value} ${uuid.isValid ? '✅' : '❌'}</span>
+                </div>
+            `).join('');
+            
+            uuidInfo.style.display = 'block';
+        }
+
+        // Replace all UUIDs
+        function replaceUUIDs() {
+            const input = document.getElementById('inputManifest').value.trim();
+            if (!input) {
+                showError('Input manifest tidak boleh kosong!');
+                return;
+            }
+
+            try {
+                const manifest = JSON.parse(input);
+                const newUUIDs = [];
+                
+                // Replace UUIDs recursively
+                function replaceUUIDsInObject(obj) {
+                    for (const key in obj) {
+                        if (key === 'uuid' && typeof obj[key] === 'string') {
+                            const newUUID = generateUUID();
+                            newUUIDs.push({
+                                old: obj[key],
+                                new: newUUID,
+                                path: key
+                            });
+                            obj[key] = newUUID;
+                        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                            replaceUUIDsInObject(obj[key]);
+                        }
+                    }
+                }
+                
+                replaceUUIDsInObject(manifest);
+                
+                // Format and display result
+                const result = JSON.stringify(manifest, null, 2);
+                document.getElementById('outputManifest').value = result;
+                
+                showSuccess(`✅ Berhasil mengganti ${newUUIDs.length} UUID!`);
+                
+                // Show replacement info
+                if (newUUIDs.length > 0) {
+                    const replacementInfo = newUUIDs.map(uuid => 
+                        `${uuid.path}: ${uuid.old} → ${uuid.new}`
+                    ).join('\n');
+                    console.log('UUID Replacements:\n', replacementInfo);
+                }
+                
+            } catch (error) {
+                showError('Error: ' + error.message);
+            }
+        }
+
+        // Copy result to clipboard
+        function copyResult() {
+            const output = document.getElementById('outputManifest').value;
+            if (!output.trim()) {
+                showError('Tidak ada hasil untuk dicopy!');
+                return;
+            }
+
+            navigator.clipboard.writeText(output).then(() => {
+                showSuccess('📋 Manifest berhasil dicopy ke clipboard!');
+            }).catch(() => {
+                showError('Gagal copy ke clipboard!');
+            });
+        }
+
+        // Download result
+        function downloadResult() {
+            const output = document.getElementById('outputManifest').value;
+            if (!output.trim()) {
+                showError('Tidak ada hasil untuk didownload!');
+                return;
+            }
+
+            const blob = new Blob([output], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'manifest_new_uuid.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showSuccess('💾 File manifest berhasil didownload!');
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const msg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            errorMsg.classList.remove('show');
+            msg.textContent = message;
+            msg.classList.add('show');
+            
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Show error message  
+        function showError(message) {
+            const msg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            
+            successMsg.classList.remove('show');
+            msg.textContent = message;
+            msg.classList.add('show');
+            
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

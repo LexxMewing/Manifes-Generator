@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID Generator - Minecraft Add-on</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .uuid-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .uuid-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .uuid-display {
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1em;
+            color: #495057;
+            word-break: break-all;
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+
+        .uuid-display:hover {
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-copy {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        .manifest-preview {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            text-align: left;
+            overflow-x: auto;
+        }
+
+        .json-key {
+            color: #81c784;
+        }
+
+        .json-string {
+            color: #ffb74d;
+        }
+
+        .json-number {
+            color: #64b5f6;
+        }
+
+        .success-msg {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 10px 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .success-msg.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info-box {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .uuid-display {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 UUID Generator</h1>
+        <p class="subtitle">Untuk Minecraft Add-on Development</p>
+
+        <div class="info-box">
+            <strong>Info:</strong> Setiap add-on Minecraft butuh 2 UUID yang berbeda - satu untuk header dan satu untuk module.
+        </div>
+
+        <div class="uuid-section">
+            <div class="uuid-label">🏷️ Header UUID:</div>
+            <div class="uuid-display" id="headerUuid">Klik "Generate UUID" untuk membuat</div>
+            <button class="btn btn-copy" onclick="copyUuid('headerUuid')">📋 Copy Header UUID</button>
+        </div>
+
+        <div class="uuid-section">
+            <div class="uuid-label">⚙️ Module UUID:</div>
+            <div class="uuid-display" id="moduleUuid">Klik "Generate UUID" untuk membuat</div>
+            <button class="btn btn-copy" onclick="copyUuid('moduleUuid')">📋 Copy Module UUID</button>
+        </div>
+
+        <button class="btn" onclick="generateUUIDs()">🎲 Generate New UUIDs</button>
+        <button class="btn" onclick="copyManifest()">📄 Copy Full Manifest</button>
+
+        <div class="success-msg" id="successMsg">✅ UUID berhasil dicopy!</div>
+
+        <div class="manifest-preview" id="manifestPreview">
+            <span class="json-key">"uuid"</span>: <span class="json-string">"Generate UUID terlebih dahulu"</span>
+        </div>
+    </div>
+
+    <script>
+        // Generate UUID v4
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Generate both UUIDs
+        function generateUUIDs() {
+            const headerUuid = generateUUID();
+            const moduleUuid = generateUUID();
+            
+            document.getElementById('headerUuid').textContent = headerUuid;
+            document.getElementById('moduleUuid').textContent = moduleUuid;
+            
+            updateManifestPreview(headerUuid, moduleUuid);
+            
+            // Add some animation
+            document.querySelectorAll('.uuid-display').forEach(el => {
+                el.style.transform = 'scale(1.05)';
+                el.style.borderColor = '#28a745';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                    el.style.borderColor = '#e9ecef';
+                }, 300);
+            });
+        }
+
+        // Copy individual UUID
+        function copyUuid(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            if (text === "Klik \"Generate UUID\" untuk membuat") {
+                alert('Generate UUID terlebih dahulu!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccessMessage();
+            });
+        }
+
+        // Copy full manifest.json
+        function copyManifest() {
+            const headerUuid = document.getElementById('headerUuid').textContent;
+            const moduleUuid = document.getElementById('moduleUuid').textContent;
+            
+            if (headerUuid === "Klik \"Generate UUID\" untuk membuat") {
+                alert('Generate UUID terlebih dahulu!');
+                return;
+            }
+            
+            const manifest = `{
+  "format_version": 2,
+  "header": {
+    "name": "No Drowning Damage",
+    "description": "Addon untuk membuat player tidak kena damage saat tenggelam",
+    "uuid": "${headerUuid}",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 10]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "${moduleUuid}",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.8.0"
+    }
+  ]
+}`;
+            
+            navigator.clipboard.writeText(manifest).then(() => {
+                showSuccessMessage('Manifest lengkap berhasil dicopy!');
+            });
+        }
+
+        // Show success message
+        function showSuccessMessage(message = '✅ UUID berhasil dicopy!') {
+            const msg = document.getElementById('successMsg');
+            msg.textContent = message;
+            msg.classList.add('show');
+            
+            setTimeout(() => {
+                msg.classList.remove('show');
+            }, 2000);
+        }
+
+        // Update manifest preview
+        function updateManifestPreview(headerUuid, moduleUuid) {
+            const preview = document.getElementById('manifestPreview');
+            preview.innerHTML = `<span class="json-key">"header"</span>: {
+  <span class="json-key">"uuid"</span>: <span class="json-string">"${headerUuid}"</span>
+},
+<span class="json-key">"modules"</span>: [{
+  <span class="json-key">"uuid"</span>: <span class="json-string">"${moduleUuid}"</span>
+}]`;
+        }
+
+        // Generate initial UUIDs on page load
+        window.addEventListener('load', () => {
+            generateUUIDs();
+        });
+    </script>
+</body>
+</html>
